@@ -47,6 +47,7 @@ static void head(char *title, char *head) {
 	printf("\n<title>%s</title>", title);
 	printf("<h2><a href=\"/\" style=\"text-decoration:none;color:black\">%s"
 		"</a></h2>\n", title);
+	printf("<link rel='stylesheet' href='fefe.css' type='text/css' charset='utf-8'/>");
 	printf("<b>%s</b>\n\n", head);
 }
 
@@ -319,10 +320,10 @@ static void dispatch(char *query, sqlite3 *db) {
 			pmon = 12;
 			pyear--;
 		}
-		printf("<a href=\"blag.cgi?mon=%04d%02d\">fr&uuml;her</a> -- ",
+		printf("<a href=\"?mon=%04d%02d\">fr&uuml;her</a> -- ",
 			pyear, pmon);
 
-		printf("<a href=\"blag.cgi?mon=%04d%02d\">aktuell</a> -- ",
+		printf("<a href=\"?mon=%04d%02d\">aktuell</a> -- ",
 			local->tm_year + 1900, local->tm_mon + 1);
 
 		pyear = year;
@@ -331,10 +332,10 @@ static void dispatch(char *query, sqlite3 *db) {
 			pmon = 1;
 			pyear++;
 		}
-		printf("<a href=\"blag.cgi?mon=%04d%02d\">sp&auml;ter</a>", 
+		printf("<a href=\"?mon=%04d%02d\">sp&auml;ter</a>", 
 			pyear, pmon);
 	} else {
-		printf("<a href=\"blag.cgi?mon=%04d%02d\">ganzer Monat</a>",
+		printf("<a href=\"?mon=%04d%02d\">ganzer Monat</a>",
 			local->tm_year + 1900, local->tm_mon + 1);
 	}
 
