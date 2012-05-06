@@ -388,19 +388,11 @@ static void dispatch(config_t conf) {
 			pmon = 12;
 			pyear--;
 		}
-<<<<<<< HEAD
-		printf("<a href=\"?mon=%04d%02d\">fr&uuml;her</a> -- ",
-			pyear, pmon);
-
-		printf("<a href=\"?mon=%04d%02d\">aktuell</a> -- ",
-			local->tm_year + 1900, local->tm_mon + 1);
-=======
 		printf("<a href=\"%s?mon=%04d%02d\">fr&uuml;her</a> -- ",
 			conf.self, pyear, pmon);
 
 		printf("<a href=\"%s?mon=%04d%02d\">aktuell</a> -- ",
 			conf.self, local->tm_year + 1900, local->tm_mon + 1);
->>>>>>> 091d1da7764ac9271c4f8bb00f7e4a48ad665ba1
 
 		pyear = year;
 		pmon = mon + 1;
@@ -408,19 +400,11 @@ static void dispatch(config_t conf) {
 			pmon = 1;
 			pyear++;
 		}
-<<<<<<< HEAD
-		printf("<a href=\"?mon=%04d%02d\">sp&auml;ter</a>", 
-			pyear, pmon);
-	} else {
-		printf("<a href=\"?mon=%04d%02d\">ganzer Monat</a>",
-			local->tm_year + 1900, local->tm_mon + 1);
-=======
 		printf("<a href=\"%s?mon=%04d%02d\">sp&auml;ter</a>", 
 			conf.self, pyear, pmon);
 	} else {
 		printf("<a href=\"%s?mon=%04d%02d\">ganzer Monat</a>",
 			conf.self, local->tm_year + 1900, local->tm_mon + 1);
->>>>>>> 091d1da7764ac9271c4f8bb00f7e4a48ad665ba1
 	}
 
 	printf("</div>\n");
