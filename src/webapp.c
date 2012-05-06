@@ -49,7 +49,6 @@ static void head(char *title, char *head) {
 
 	printf("<h2><a href=\"blag.cgi\" style=\"text-decoration:none;"
 		"color:black\">%s</a></h2>\n", title);
-	printf("<link rel='stylesheet' href='fefe.css' type='text/css' charset='utf-8'/>");
 	printf("<b>%s</b>\n\n", head);
 }
 
