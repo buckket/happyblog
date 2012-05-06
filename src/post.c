@@ -24,13 +24,6 @@ static void usage(char *argv) {
 	printf("USAGE: %s [-u hash] [database] ...\n", argv);
 }
 
-static void delnewline(char *in) {
-	int i;
-	for(i = 0; i < strlen(in); i++)
-		if(in[i] == '\n')
-			in[i] = ' ';
-}
-
 static unsigned int hex2int(char *in) {
 	unsigned int out = 0;
 	int i;
@@ -132,20 +125,17 @@ int main(int argc, char **argv) {
 	fgets(buf, MAXBUF, stdin);
 	while(strlen(buf) > 1) {
 		oldsize = size;
-		delnewline(buf);
 		size += strlen(buf);
-		if((post = realloc(post, size)) == NULL) {
+		if((post = realloc(post, size + 1)) == NULL) {
 			fprintf(stderr, "ERROR: realloc() failed.\n");
 			if(post)
 				free(post);
 			return 1;
 		}
-		post[oldsize] = '\0';
-
 		strcat(post, buf);
-
 		fgets(buf, MAXBUF, stdin);
 	}
+	post[size - 1] = '\0';
 
 	if(hash == 0)
 		i = 1;
@@ -153,7 +143,7 @@ int main(int argc, char **argv) {
 		i = 3;
 	for(; i < argc; i++)
 		addpost(post, size, hash, argv[i]);
-	
+
 	free(post);
 	return 0;
 }
