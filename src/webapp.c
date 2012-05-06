@@ -66,7 +66,7 @@ static void head(config_t conf) {
 
 	printf("\n<title>%s</title>", conf.title);
 	printf("<h2><a href=\"%s\" style=\"text-decoration:none;"
-		"color:black\">%s</a></h2>\n", conf.self, conf.title);
+		"color:black\">%s</a></h2>\n", conf.self?conf.self:"/", conf.title);
 	printf("<b>%s</b>\n\n", conf.head);
 }
 
@@ -176,11 +176,6 @@ static int getcgivars(config_t *config) {
 	cookie = getenv("HTTP_COOKIE");
 	config->query = getenv("QUERY_STRING");
 	config->self = getenv("SCRIPT_NAME");
-
-	if(!config->query || !config->self) {
-		printf(ERRHEAD "Error retrieving CGI variables.\n");
-		return 0;
-	}
 
 	config->query_type = getquerytype(config->query);
 
@@ -388,11 +383,11 @@ static void dispatch(config_t conf) {
 			pmon = 12;
 			pyear--;
 		}
-		printf("<a href=\"%s?mon=%04d%02d\">fr&uuml;her</a> -- ",
-			conf.self, pyear, pmon);
+		printf("<a href=\"?mon=%04d%02d\">früher</a> -- ",
+			pyear, pmon);
 
-		printf("<a href=\"%s?mon=%04d%02d\">aktuell</a> -- ",
-			conf.self, local->tm_year + 1900, local->tm_mon + 1);
+		printf("<a href=\"?mon=%04d%02d\">aktuell</a> -- ",
+			local->tm_year + 1900, local->tm_mon + 1);
 
 		pyear = year;
 		pmon = mon + 1;
@@ -400,11 +395,11 @@ static void dispatch(config_t conf) {
 			pmon = 1;
 			pyear++;
 		}
-		printf("<a href=\"%s?mon=%04d%02d\">sp&auml;ter</a>", 
-			conf.self, pyear, pmon);
+		printf("<a href=\"?mon=%04d%02d\">später</a>", 
+			pyear, pmon);
 	} else {
-		printf("<a href=\"%s?mon=%04d%02d\">ganzer Monat</a>",
-			conf.self, local->tm_year + 1900, local->tm_mon + 1);
+		printf("<a href=\"?mon=%04d%02d\">ganzer Monat</a>",
+			local->tm_year + 1900, local->tm_mon + 1);
 	}
 
 	printf("</div>\n");
