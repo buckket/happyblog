@@ -65,8 +65,8 @@ static void head(config_t conf) {
 #endif
 
 	printf("\n<title>%s</title>", conf.title);
-	printf("<h2><a href=\"%s\" style=\"text-decoration:none;"
-		"color:black\">%s</a></h2>\n", conf.self?conf.self:"/", conf.title);
+	printf("<h2><a href=\"\\\" style=\"text-decoration:none;"
+		"color:black\">%s</a></h2>\n", conf.title);
 	printf("<b>%s</b>\n\n", conf.head);
 }
 
