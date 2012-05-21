@@ -15,6 +15,8 @@
 
 #include <sqlite3.h>
 
+#include "help.h"
+
 #define MAXBUF	512
 
 typedef struct {
@@ -24,107 +26,6 @@ typedef struct {
 
 	sqlite3 *db;
 } config_t;
-
-void delnewline(char *in) {
-	int i;
-	for(i = 0; i < strlen(in); i++)
-		if(in[i] == '\n')
-			in[i] = '\0';
-}
-
-static void head(char *title, char *baseurl, char *desc) {
-	printf("Content-Type: text/xml;charset=utf-8\r\n\r\n");
-
-	printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-	printf("<rss version=\"2.0\">\n\n");
-
-	printf("<channel>\n");
-	printf("<title>%s</title>\n", title);
-	printf("<link>%s</link>\n", baseurl);
-	printf("<description>%s</description>\n", desc);
-	printf("<language>de</language>\n\n");
-}
-
-static void tail(void) {
-	printf("</channel>\n");
-	printf("</rss>\n");
-}
-
-static config_t readconfig(char *filename) {
-	config_t out;
-	FILE *fp;
-	char dbfile[512], *buf;
-	int buflen;
-	sqlite3_stmt *statement;
-
-	out.title = out.desc = out.baseurl = NULL;
-	out.db = NULL;
-
-	if((fp = fopen(filename, "r")) == NULL) {
-		printf("ERROR: '%s' not found.\n", filename);
-		return out;
-	}
-
-	fgets(dbfile, 512, fp);
-	fclose(fp);
-	delnewline(dbfile);
-
-	if(sqlite3_open(dbfile, &out.db)) {
-		printf("ERROR: Could not open database '%s': %s\n", dbfile,
-			sqlite3_errmsg(out.db));
-		out.db = NULL;
-		return out;
-	}
-
-	sqlite3_prepare(out.db, "SELECT title FROM config;",
-		MAXBUF, &statement, NULL);
-
-	if(sqlite3_step(statement) == SQLITE_ROW) {
-		buflen = sqlite3_column_bytes(statement, 0) + 1;
-		buf = (char*)sqlite3_column_text(statement, 0);
-
-		if((out.title = malloc(buflen)) == NULL) {
-			printf("ERROR: malloc(desc) failed.\n");
-			out.db = NULL;
-			return out;
-		}
-		strncpy(out.title, buf, buflen);
-	}
-
-	sqlite3_prepare(out.db, "SELECT desc, baseurl FROM rssconfig;",
-		MAXBUF, &statement, NULL);
-
-	if(sqlite3_step(statement) == SQLITE_ROW) {
-		buflen = sqlite3_column_bytes(statement, 0) + 1;
-		buf = (char*)sqlite3_column_text(statement, 0);
-
-		if((out.desc = malloc(buflen)) == NULL) {
-			printf("ERROR: malloc(desc) failed.\n");
-			free(out.title);
-			out.title = NULL;
-			out.db = NULL;
-			return out;
-		}
-		strncpy(out.desc, buf, buflen);
-
-		buflen = sqlite3_column_bytes(statement, 1) + 1;
-		buf = (char*)sqlite3_column_text(statement, 1);
-
-		if((out.baseurl = malloc(buflen)) == NULL) {
-			printf("ERROR: malloc(baseurl) failed.\n");
-			free(out.title);
-			out.title = NULL;
-			free(out.desc);
-			out.desc = NULL;
-			out.db = NULL;
-			return out;
-		}
-		strncpy(out.baseurl, buf, buflen);
-	}
-
-	sqlite3_finalize(statement);
-	return out;
-}
 
 static char *strip(char *in, unsigned int hash) {
 	char *out;
@@ -162,6 +63,24 @@ static char *strip(char *in, unsigned int hash) {
 	return out;
 }
 
+static void head(char *title, char *baseurl, char *desc) {
+	printf("Content-Type: text/xml;charset=utf-8\r\n\r\n");
+
+	printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+	printf("<rss version=\"2.0\">\n\n");
+
+	printf("<channel>\n");
+	printf("<title>%s</title>\n", title);
+	printf("<link>%s</link>\n", baseurl);
+	printf("<description>%s</description>\n", desc);
+	printf("<language>de</language>\n\n");
+}
+
+static void tail(void) {
+	printf("</channel>\n");
+	printf("</rss>\n");
+}
+
 static void printposts(sqlite3 *db, char *baseurl, int num) {
 	sqlite3_stmt *statement;
 	int count = 0, hash;
@@ -186,6 +105,84 @@ static void printposts(sqlite3 *db, char *baseurl, int num) {
 			free(title);
 		count++;
 	}
+	sqlite3_finalize(statement);
+}
+
+static config_t readconfig(char *filename) {
+	config_t out;
+	FILE *fp;
+	char dbfile[512], *buf;
+	int buflen;
+	sqlite3_stmt *statement;
+
+	out.title = out.desc = out.baseurl = NULL;
+	out.db = NULL;
+
+	if((fp = fopen(filename, "r")) == NULL) {
+		printf("ERROR: '%s' not found.\n", filename);
+		return out;
+	}
+
+	fgets(dbfile, 512, fp);
+	fclose(fp);
+	delnewline(dbfile);
+
+	if(sqlite3_open(dbfile, &out.db)) {
+		printf("ERROR: Could not open database '%s': %s\n", dbfile,
+			sqlite3_errmsg(out.db));
+		out.db = NULL;
+		return out;
+	}
+
+	sqlite3_prepare(out.db, "SELECT title FROM config;",
+		MAXBUF, &statement, NULL);
+
+	if(sqlite3_step(statement) == SQLITE_ROW) {
+		buflen = sqlite3_column_bytes(statement, 0) + 1;
+		buf = (char*)sqlite3_column_text(statement, 0);
+
+		if((out.title = malloc(buflen)) == NULL) {
+			printf("ERROR: malloc(title) failed.\n");
+			out.db = NULL;
+			return out;
+		}
+		strncpy(out.title, buf, buflen);
+	}
+	sqlite3_finalize(statement);
+
+	sqlite3_prepare(out.db, "SELECT desc, baseurl FROM rssconfig;",
+		MAXBUF, &statement, NULL);
+
+	if(sqlite3_step(statement) == SQLITE_ROW) {
+		buflen = sqlite3_column_bytes(statement, 0) + 1;
+		buf = (char*)sqlite3_column_text(statement, 0);
+
+		if((out.desc = malloc(buflen)) == NULL) {
+			printf("ERROR: malloc(desc) failed.\n");
+			free(out.title);
+			out.title = NULL;
+			out.db = NULL;
+			return out;
+		}
+		strncpy(out.desc, buf, buflen);
+
+		buflen = sqlite3_column_bytes(statement, 1) + 1;
+		buf = (char*)sqlite3_column_text(statement, 1);
+
+		if((out.baseurl = malloc(buflen)) == NULL) {
+			printf("ERROR: malloc(baseurl) failed.\n");
+			free(out.title);
+			out.title = NULL;
+			free(out.desc);
+			out.desc = NULL;
+			out.db = NULL;
+			return out;
+		}
+		strncpy(out.baseurl, buf, buflen);
+	}
+
+	sqlite3_finalize(statement);
+	return out;
 }
 
 int main(void) {
@@ -200,6 +197,7 @@ int main(void) {
 	printposts(config.db, config.baseurl, 16);
 	tail();
 
+	sqlite3_close(config.db);
 	free(config.title);
 	free(config.baseurl);
 	free(config.desc);
