@@ -9,6 +9,8 @@ CFLAGS=-O0 -Wall -ggdb -I$(INC)
 LDFLAGS=-lsqlite3
 #DDATE=-DDDATE
 
+#DDATE=-DDDATE
+
 all:
 	make $(BIN)/blag.cgi
 	make $(BIN)/blag-rss.cgi
